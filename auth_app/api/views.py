@@ -9,6 +9,7 @@ from .utils import (
     generate_activation_token,
     get_tokens_for_user,
     get_user_from_uidb64,
+    process_password_reset_request,
     refresh_access_token,
     send_activation_email,
     set_auth_cookies,
@@ -128,3 +129,18 @@ class TokenRefreshView(APIView):
             key="access_token", value=new_access, httponly=True, samesite="Lax"
         )
         return response
+
+
+class PasswordResetRequestView(APIView):
+    """API endpoint to initiate a password reset workflow for a user."""
+
+    def post(self, request):
+        """Accept email, trigger token generation, and return generic success response."""
+        email = request.data.get("email")
+        if email:
+            process_password_reset_request(email)
+
+        return Response(
+            {"detail": "An email has been sent to reset your password."},
+            status=status.HTTP_200_OK,
+        )

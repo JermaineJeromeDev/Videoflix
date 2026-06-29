@@ -1,6 +1,13 @@
 from django.urls import path
 
-from .views import ActivateView, LoginView, LogoutView, RegisterView, TokenRefreshView
+from .views import (
+    ActivateView,
+    LoginView,
+    LogoutView,
+    PasswordResetRequestView,
+    RegisterView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
@@ -8,4 +15,5 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("password_reset/", PasswordResetRequestView.as_view(), name="password_reset"),
 ]

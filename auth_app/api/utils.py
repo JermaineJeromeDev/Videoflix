@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 User = get_user_model()
@@ -71,3 +71,15 @@ def refresh_access_token(refresh_token_string):
         return str(refresh.access_token)
     except Exception:
         return None
+
+
+def process_password_reset_request(email):
+    """Generate uidb64 and password reset token if the user exists."""
+    try:
+        user = User.objects.get(email=email)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        # Placeholder for background email task: send_reset_email(user, uidb64, token)
+        return True
+    except User.DoesNotExist:
+        return False
