@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -32,3 +33,22 @@ def verify_and_activate_user(user, token):
         user.save()
         return True
     return False
+
+
+def get_tokens_for_user(user):
+    """Generate access and refresh tokens for a given user."""
+    refresh = RefreshToken.for_user(user)
+    return {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+    }
+
+
+def set_auth_cookies(response, tokens):
+    """Set secure HttpOnly cookies for access and refresh tokens."""
+    response.set_cookie(
+        key="access_token", value=tokens["access"], httponly=True, samesite="Lax"
+    )
+    response.set_cookie(
+        key="refresh_token", value=tokens["refresh"], httponly=True, samesite="Lax"
+    )
