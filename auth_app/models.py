@@ -15,6 +15,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
         extra_fields.setdefault("is_active", False)
+
+        extra_fields.setdefault("username", email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -32,6 +34,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     """Custom user model that supports using email instead of username."""
 
     email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150, unique=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -39,7 +42,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         """Return the string representation of the user."""
