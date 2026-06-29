@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from .serializers import RegisterSerializer
 from .utils import (
+    blacklist_refresh_token,
     generate_activation_token,
     get_tokens_for_user,
     get_user_from_uidb64,
@@ -72,4 +73,30 @@ class LoginView(APIView):
         )
 
         set_auth_cookies(response, tokens)
+        return response
+
+
+class LogoutView(APIView):
+    """API endpoint to log out users by blacklisting their refresh token."""
+
+    def post(self, request):
+        """Extract refresh token from cookies, blacklist it, and clear cookies."""
+
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        if not refresh_token or not blacklist_refresh_token(refresh_token):
+            return Response(
+                {"detail": "Refresh token is missing or invalid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        response = Response(
+            {
+                "detail": "Logout successful! All tokens will be deleted. Refresh token is now invalid."
+            },
+            status=status.HTTP_200_OK,
+        )
+
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
         return response
