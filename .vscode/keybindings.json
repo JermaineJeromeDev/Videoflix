@@ -1,0 +1,7 @@
+[
+    {
+        "key": "ctrl+alt+i",
+        "command": "python.sortImports",
+        "when": "editorTextFocus && editorLangId == 'python'"
+    }
+]

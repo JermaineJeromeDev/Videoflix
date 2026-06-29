@@ -1,0 +1,48 @@
+{
+    "pylint.enabled": true,
+    "pylint.args": [
+        "--max-line-length=100",
+        "--enable=all",
+        "--load-plugins=pylint_django",
+        "--django-settings-module=core.settings"
+    ],
+    "pylint.severity": {
+        "convention": "Error",
+        "refactor": "Error",
+        "warning": "Error",
+        "error": "Error",
+        "fatal": "Error"
+    },
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.sortImports.path": "isort",
+    "python.sortImports.args": [
+        "--profile",
+        "black",
+        "--line-length",
+        "100",
+        "--thirdparty",
+        "django",
+        "--thirdparty",
+        "pytest",
+        "--thirdparty",
+        "rest_framework"
+    ],
+    "isort.args": [
+        "--profile",
+        "black",
+        "--line-length",
+        "100",
+        "--thirdparty",
+        "django",
+        "--thirdparty",
+        "pytest",
+        "--thirdparty",
+        "rest_framework"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}
