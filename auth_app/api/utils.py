@@ -16,8 +16,16 @@ def generate_activation_token(user):
 
 
 def send_activation_email(user, token):
-    """Send an activation email containing the verification link."""
-    pass
+    """Queue the activation email containing a link that points to the frontend."""
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+    frontend_link = f"http://localhost:4200/activate/{uidb64}/{token}/"
+
+    subject = "Activate your Videoflix Account"
+    message = (
+        f"Please click the following link to activate your account: {frontend_link}"
+    )
+    send_async_email.delay(subject, message, [user.email])
 
 
 def get_user_from_uidb64(uidb64):

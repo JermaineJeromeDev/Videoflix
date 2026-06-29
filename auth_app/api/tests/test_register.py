@@ -25,7 +25,7 @@ class TestRegisterHappyPath:
     def test_registration_success(
         self, api_client: APIClient, register_url: str
     ) -> None:
-        """Verify that a valid user is created successfully as inactive and returns a token."""
+        """Verify that a valid user is created successfully as inactive."""
         payload = {
             "email": "newuser@example.com",
             "password": "securepassword123",
@@ -36,7 +36,6 @@ class TestRegisterHappyPath:
         assert response.status_code == status.HTTP_201_CREATED
         assert "user" in response.data
         assert response.data["user"]["email"] == "newuser@example.com"
-        assert "token" in response.data
 
         user = User.objects.get(email="newuser@example.com")
         assert user.is_active is False

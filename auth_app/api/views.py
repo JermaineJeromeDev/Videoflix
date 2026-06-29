@@ -28,8 +28,9 @@ class RegisterView(APIView):
             user = serializer.save()
             token = generate_activation_token(user)
             send_activation_email(user, token)
+
             return Response(
-                {"user": {"id": user.id, "email": user.email}, "token": token},
+                {"user": {"id": user.id, "email": user.email}},
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
