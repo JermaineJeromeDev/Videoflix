@@ -9,6 +9,7 @@ from .utils import (
     generate_activation_token,
     get_tokens_for_user,
     get_user_from_uidb64,
+    refresh_access_token,
     send_activation_email,
     set_auth_cookies,
     verify_and_activate_user,
@@ -99,4 +100,31 @@ class LogoutView(APIView):
 
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
+        return response
+
+
+class TokenRefreshView(APIView):
+    """API endpoint to refresh the access token cookie using a refresh token cookie."""
+
+    def post(self, request):
+        """Extract refresh token from cookies and set a fresh access token cookie."""
+        refresh_token = request.COOKIES.get("refresh_token")
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token missing"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        new_access = refresh_access_token(refresh_token)
+        if not new_access:
+            return Response(
+                {"detail": "Token invalid"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        response = Response(
+            {"detail": "Token refreshed", "access": new_access},
+            status=status.HTTP_200_OK,
+        )
+        response.set_cookie(
+            key="access_token", value=new_access, httponly=True, samesite="Lax"
+        )
         return response

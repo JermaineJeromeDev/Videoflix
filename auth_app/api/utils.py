@@ -62,3 +62,12 @@ def blacklist_refresh_token(token_string):
         return True
     except TokenError:
         return False
+
+
+def refresh_access_token(refresh_token_string):
+    """Validate refresh token and return a new access token string or None."""
+    try:
+        refresh = RefreshToken(refresh_token_string)
+        return str(refresh.access_token)
+    except Exception:
+        return None
