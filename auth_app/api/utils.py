@@ -83,3 +83,12 @@ def process_password_reset_request(email):
         return True
     except User.DoesNotExist:
         return False
+
+
+def reset_user_password(user, token, new_password):
+    """Verify the token and update the user's password securely."""
+    if user and default_token_generator.check_token(user, token):
+        user.set_password(new_password)
+        user.save()
+        return True
+    return False

@@ -11,6 +11,7 @@ from .utils import (
     get_user_from_uidb64,
     process_password_reset_request,
     refresh_access_token,
+    reset_user_password,
     send_activation_email,
     set_auth_cookies,
     verify_and_activate_user,
@@ -143,4 +144,30 @@ class PasswordResetRequestView(APIView):
         return Response(
             {"detail": "An email has been sent to reset your password."},
             status=status.HTTP_200_OK,
+        )
+
+
+class PasswordConfirmView(APIView):
+    """API endpoint to confirm and finalize the password reset process."""
+
+    def post(self, request, uidb64, token):
+        """Validate input passwords and cryptographic tokens to update user credentials."""
+        new_password = request.data.get("new_password")
+        confirm_password = request.data.get("confirm_password")
+
+        if not new_password or new_password != confirm_password:
+            return Response(
+                {"detail": "Passwords do not match."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_user_from_uidb64(uidb64)
+        if reset_user_password(user, token, new_password):
+            return Response(
+                {"detail": "Your Password has been successfully reset."},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(
+            {"detail": "Invalid token or user."}, status=status.HTTP_400_BAD_REQUEST
         )
