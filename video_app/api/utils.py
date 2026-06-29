@@ -10,3 +10,12 @@ def get_hls_manifest_file(movie_id, resolution):
     if os.path.exists(absolute_path):
         return absolute_path
     return None
+
+
+def get_hls_segment_file(movie_id, resolution, segment):
+    """Return the absolute path of the ts segment if it exists, otherwise None."""
+    relative_path = os.path.join("videos", str(movie_id), resolution, segment)
+    absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+    if os.path.exists(absolute_path):
+        return absolute_path
+    return None

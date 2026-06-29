@@ -7,7 +7,7 @@ from video_app.api.authentication import CookieJWTAuthentication
 from video_app.api.serializers import VideoSerializer
 from video_app.models import Video
 
-from .utils import get_hls_manifest_file
+from .utils import get_hls_manifest_file, get_hls_segment_file
 
 
 class VideoListView(ListAPIView):
@@ -31,3 +31,19 @@ class HLSManifestView(APIView):
 
         file_handle = open(file_path, "rb")
         return FileResponse(file_handle, content_type="application/vnd.apple.mpegurl")
+
+
+class HLSSegmentView(APIView):
+    """API endpoint to stream secure bin HLS .ts video segments."""
+
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, movie_id, resolution, segment):
+        """Open and return the requested ts file as a secure FileResponse."""
+        file_path = get_hls_segment_file(movie_id, resolution, segment)
+        if not file_path:
+            raise Http404("Segment file not found.")
+
+        file_handle = open(file_path, "rb")
+        return FileResponse(file_handle, content_type="video/MP2T")
