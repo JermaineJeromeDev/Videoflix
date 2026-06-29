@@ -1,8 +1,12 @@
+import os
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
+from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django_rq import job
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
@@ -16,16 +20,20 @@ def generate_activation_token(user):
 
 
 def send_activation_email(user, token):
-    """Queue the activation email containing a link that points to the frontend."""
+    """Render the HTML activation template and queue the background task."""
     uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    frontend_link = f"http://localhost:5500/activate/{uidb64}/{token}/"
 
-    frontend_link = f"http://localhost:4200/activate/{uidb64}/{token}/"
+    context = {"user": user, "activate_url": frontend_link}
+    html_content = render_to_string("auth_app/activation_email.html", context)
+    text_content = strip_tags(html_content)
 
-    subject = "Activate your Videoflix Account"
-    message = (
-        f"Please click the following link to activate your account: {frontend_link}"
+    send_async_email.delay(
+        "Activate your Videoflix Account",
+        text_content,
+        [user.email],
+        html_message=html_content,
     )
-    send_async_email.delay(subject, message, [user.email])
 
 
 def get_user_from_uidb64(uidb64):
@@ -90,7 +98,6 @@ def process_password_reset_request(email):
         user = User.objects.get(email=email)
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-
         return True
     except User.DoesNotExist:
         return False
@@ -106,19 +113,13 @@ def reset_user_password(user, token, new_password):
 
 
 @job
-def send_async_email(subject, message, recipient_list):
-    """Send an email asynchronously using the integrated django-rq worker."""
+def send_async_email(subject, message, recipient_list, html_message=None):
+    """Send an email asynchronously with optional HTML content support."""
     send_mail(
         subject=subject,
         message=message,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=recipient_list,
         fail_silently=False,
+        html_message=html_message,
     )
-
-
-def send_activation_email(user, token):
-    """Queue the activation email task into the Redis default queue."""
-    subject = "Activate your Videoflix Account"
-    message = f"Please use this token to activate your account: {token}"
-    send_async_email.delay(subject, message, [user.email])
