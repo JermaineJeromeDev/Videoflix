@@ -1,9 +1,11 @@
 import os
+from email.mime.application import MIMEApplication
+from email.mime.image import MIMEImage
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.html import strip_tags
@@ -22,9 +24,14 @@ def generate_activation_token(user):
 def send_activation_email(user, token):
     """Render the HTML activation template and queue the background task."""
     uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-    frontend_link = f"http://localhost:5500/activate/{uidb64}/{token}/"
+    frontend_link = f"{settings.FRONTEND_URL.rstrip('/')}/pages/auth/activate.html?uid={uidb64}&token={token}"
+    site_url = settings.BACKEND_URL.rstrip("/")
 
-    context = {"user": user, "activate_url": frontend_link}
+    context = {
+        "user": user,
+        "activate_url": frontend_link,
+        "site_url": site_url,
+    }
     html_content = render_to_string("auth_app/activation_email.html", context)
     text_content = strip_tags(html_content)
 
@@ -92,12 +99,34 @@ def refresh_access_token(refresh_token_string):
         return None
 
 
+def send_password_reset_email(user, token):
+    """Render the HTML password reset template and queue the background task."""
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    frontend_link = f"{settings.FRONTEND_URL.rstrip('/')}/pages/auth/password_confirm.html?uid={uidb64}&token={token}"
+    site_url = settings.BACKEND_URL.rstrip("/")
+
+    context = {
+        "user": user,
+        "reset_url": frontend_link,
+        "site_url": site_url,
+    }
+    html_content = render_to_string("auth_app/password_reset_email.html", context)
+    text_content = strip_tags(html_content)
+
+    send_async_email.delay(
+        "Passwort zurücksetzen bei Videoflix",
+        text_content,
+        [user.email],
+        html_message=html_content,
+    )
+
+
 def process_password_reset_request(email):
     """Generate uidb64 and password reset token if the user exists."""
     try:
         user = User.objects.get(email=email)
-        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
+        send_password_reset_email(user, token)
         return True
     except User.DoesNotExist:
         return False
@@ -114,7 +143,7 @@ def reset_user_password(user, token, new_password):
 
 @job
 def send_async_email(subject, message, recipient_list, html_message=None):
-    """Send an email asynchronously with optional HTML content support."""
+    """Send a secure development email asynchronously via background worker."""
     send_mail(
         subject=subject,
         message=message,

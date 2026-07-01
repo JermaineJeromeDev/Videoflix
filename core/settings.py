@@ -163,10 +163,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5500")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # CORS-Freigabe basierend auf den DA-Ports und Standard-Framework-Ports
 CORS_ALLOWED_ORIGINS = [
