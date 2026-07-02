@@ -8,7 +8,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     """Serializer for validating and creating a new user registration."""
 
     confirmed_password = serializers.CharField(write_only=True)
-    # Override email to bypass automatic unique validation and use custom generic errors
+
     email = serializers.EmailField()
 
     class Meta:
