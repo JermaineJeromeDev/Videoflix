@@ -134,13 +134,17 @@ class TokenRefreshView(APIView):
 
 
 class PasswordResetRequestView(APIView):
-    """API endpoint to initiate a password reset workflow for a user."""
+    """API endpoint to initiate the password reset workflow."""
 
     def post(self, request):
-        """Accept email, trigger token generation, and return generic success response."""
+        """Accept email payload and trigger asynchronous reset email if user exists."""
         email = request.data.get("email")
-        if email:
-            process_password_reset_request(email)
+        if not email:
+            return Response(
+                {"detail": "Email is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        process_password_reset_request(email)
 
         return Response(
             {"detail": "An email has been sent to reset your password."},

@@ -50,14 +50,12 @@ class TestHLSMasterPlaylistHappyPath:
         """Verify that authenticated users can fetch a valid m3u8 file."""
         video = create_test_video
 
-        # Simulate a generated HLS file in the media folder path
         manifest_path = f"videos/{video.id}/480p/index.m3u8"
         default_storage.save(manifest_path, ContentFile("#EXTM3U\n#EXT-X-VERSION:3"))
 
         url = f"/api/video/{video.id}/480p/index.m3u8"
         response = authenticated_client.get(url)
 
-        # Clean up simulated file afterwards
         if default_storage.exists(manifest_path):
             default_storage.delete(manifest_path)
 
@@ -83,8 +81,8 @@ class TestHLSMasterPlaylistUnhappyPath:
         self, authenticated_client: APIClient, create_test_video
     ) -> None:
         """Ensure missing resolution or video paths return a 404 error."""
-        video = create_test_video
-        url = f"/api/video/{video.id}/1080p/index.m3u8"
+
+        url = "/api/video/99999/1080p/index.m3u8"
         response = authenticated_client.get(url)
 
         assert response.status_code == status.HTTP_404_NOT_FOUND

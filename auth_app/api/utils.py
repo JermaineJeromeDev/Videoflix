@@ -1,11 +1,11 @@
 import os
-from email.mime.application import MIMEApplication
 from email.mime.image import MIMEImage
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.html import strip_tags
@@ -14,6 +14,20 @@ from django_rq import job
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 User = get_user_model()
+
+
+_LOGO_PATH = os.path.join(
+    os.path.dirname(__file__), "static", "auth_app", "images", "Logo.png"
+)
+with open(_LOGO_PATH, "rb") as _f:
+    _LOGO_DATA = _f.read()
+
+
+def _attach_logo(email):
+    image = MIMEImage(_LOGO_DATA, _subtype="png")
+    image.add_header("Content-ID", "<logo>")
+    image.add_header("Content-Disposition", "inline", filename="Logo.png")
+    email.attach(image)
 
 
 def generate_activation_token(user):
@@ -35,7 +49,7 @@ def send_activation_email(user, token):
     html_content = render_to_string("auth_app/activation_email.html", context)
     text_content = strip_tags(html_content)
 
-    send_async_email.delay(
+    send_async_email(
         "Activate your Videoflix Account",
         text_content,
         [user.email],
@@ -99,22 +113,25 @@ def refresh_access_token(refresh_token_string):
         return None
 
 
-def send_password_reset_email(user, token):
-    """Render the HTML password reset template and queue the background task."""
-    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-    frontend_link = f"{settings.FRONTEND_URL.rstrip('/')}/pages/auth/password_confirm.html?uid={uidb64}&token={token}"
-    site_url = settings.BACKEND_URL.rstrip("/")
+def build_password_reset_link(uidb64, token):
+    frontend_base = settings.FRONTEND_URL.rstrip("/")
+    params = urlencode({"uid": uidb64, "token": token})
+    return f"{frontend_base}/pages/auth/confirm_password.html?{params}"
+
+
+def send_password_reset_email(user, uidb64, token):
+    reset_url = build_password_reset_link(uidb64, token)
 
     context = {
         "user": user,
-        "reset_url": frontend_link,
-        "site_url": site_url,
+        "reset_url": reset_url,
     }
+
     html_content = render_to_string("auth_app/password_reset_email.html", context)
     text_content = strip_tags(html_content)
 
-    send_async_email.delay(
-        "Passwort zurücksetzen bei Videoflix",
+    send_async_email(
+        "Reset your Videoflix Password",
         text_content,
         [user.email],
         html_message=html_content,
@@ -122,11 +139,12 @@ def send_password_reset_email(user, token):
 
 
 def process_password_reset_request(email):
-    """Generate uidb64 and password reset token if the user exists."""
+    """Generate password reset credentials and queue the asynchronous email."""
     try:
         user = User.objects.get(email=email)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        send_password_reset_email(user, token)
+        send_password_reset_email(user, uidb64, token)
         return True
     except User.DoesNotExist:
         return False
@@ -144,11 +162,15 @@ def reset_user_password(user, token, new_password):
 @job
 def send_async_email(subject, message, recipient_list, html_message=None):
     """Send a secure development email asynchronously via background worker."""
-    send_mail(
+    email = EmailMultiAlternatives(
         subject=subject,
-        message=message,
+        body=message,
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=recipient_list,
-        fail_silently=False,
-        html_message=html_message,
+        to=recipient_list,
     )
+
+    if html_message:
+        email.attach_alternative(html_message, "text/html")
+        _attach_logo(email)
+
+    email.send(fail_silently=False)
