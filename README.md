@@ -13,6 +13,29 @@
 
 REST API backend for the Videoflix video streaming platform, built with Django and Django REST Framework. It supports secure asynchronous video processing, HLS streaming, and HttpOnly cookie-based JWT authentication.
 
+### Product Pitch
+
+Videoflix is a Netflix-inspired learning platform backend for users who want secure account management and adaptive video playback while keeping media processing asynchronous and scalable.
+
+### Core Features
+
+- User registration with activation email flow
+- Account activation via secure uid/token validation
+- Login and logout with HttpOnly JWT cookies (access + refresh)
+- Refresh token blacklisting on logout
+- Password reset flow with tokenized confirmation
+- Adaptive HLS streaming with 480p, 720p, and 1080p variants
+
+### Repository Role
+
+This repository contains the backend API only. The frontend client is maintained separately and consumes the endpoints documented below.
+
+### Project Status & Scope
+
+- Type: Final backend project from the Developer Akademie training
+- Scope: MVP focused on backend architecture and API workflows
+- Production readiness: Educational project, not positioned as production-grade SaaS
+
 ### Table of Contents
 
 1. [Tech Stack](#tech-stack-en)
@@ -126,6 +149,29 @@ Videos are uploaded exclusively via the Django Admin interface (`http://localhos
 ## 🇩🇪 Deutsche Version
 
 REST-API-Backend für die Videoflix-Videostreaming-Plattform, entwickelt mit Django und dem Django REST Framework. Unterstützt asynchrone Videoverarbeitung im Hintergrund, HLS-Streaming und HttpOnly-cookiebasierte JWT-Authentifizierung.
+
+### Produkt-Pitch
+
+Videoflix ist ein Netflix-inspiriertes Backend für eine Lernplattform. Ziel ist es, sichere Benutzerverwaltung und adaptives Video-Streaming bereitzustellen und die Medienverarbeitung asynchron sowie skalierbar umzusetzen.
+
+### Kernfunktionen
+
+- Benutzerregistrierung mit Aktivierungs-E-Mail-Workflow
+- Kontoaktivierung über sichere uid/token-Prüfung
+- Login und Logout über HttpOnly-JWT-Cookies (Access + Refresh)
+- Blacklisting des Refresh-Tokens beim Logout
+- Passwort-Reset mit tokenbasierter Bestätigung
+- Adaptives HLS-Streaming in 480p, 720p und 1080p
+
+### Rolle Dieses Repositories
+
+Dieses Repository enthält ausschließlich das Backend (API). Das Frontend wird separat verwaltet und nutzt die unten dokumentierten Endpunkte.
+
+### Status & Scope
+
+- Typ: Backend-Endprojekt aus der Weiterbildung bei der Developer Akademie
+- Umfang: MVP mit Fokus auf Backend-Architektur und API-Workflows
+- Produktionsreife: Lernprojekt, nicht als produktionsreifes SaaS positioniert
 
 ### Inhaltsverzeichnis
 
