@@ -5,6 +5,7 @@ class CookieJWTAuthentication(JWTAuthentication):
     """Authenticate requests using an access token from the access_token cookie."""
 
     def authenticate(self, request):
+        """Extract and validate the JWT access token directly from the request cookies."""
         raw_token = request.COOKIES.get("access_token")
         if not raw_token:
             return None
