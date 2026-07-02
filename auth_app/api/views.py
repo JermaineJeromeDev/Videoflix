@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from .serializers import RegisterSerializer
 from .utils import (
+    _get_auth_cookie_options,
     blacklist_refresh_token,
     generate_activation_token,
     get_tokens_for_user,
@@ -76,7 +77,7 @@ class LoginView(APIView):
             status=status.HTTP_200_OK,
         )
 
-        set_auth_cookies(response, tokens)
+        set_auth_cookies(response, tokens, request=request)
         return response
 
 
@@ -128,7 +129,9 @@ class TokenRefreshView(APIView):
             status=status.HTTP_200_OK,
         )
         response.set_cookie(
-            key="access_token", value=new_access, httponly=True, samesite="Lax"
+            key="access_token",
+            value=new_access,
+            **_get_auth_cookie_options(request=request)
         )
         return response
 

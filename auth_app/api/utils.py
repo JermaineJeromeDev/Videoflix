@@ -1,6 +1,6 @@
 import os
 from email.mime.image import MIMEImage
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -84,14 +84,35 @@ def get_tokens_for_user(user):
     }
 
 
-def set_auth_cookies(response, tokens):
+def _get_auth_cookie_options(request=None):
+    """Return cookie options that work for same-host and cross-host setups."""
+    frontend_host = urlparse(settings.FRONTEND_URL).hostname
+    backend_host = urlparse(settings.BACKEND_URL).hostname
+
+    if request is not None:
+        request_host = request.get_host().split(":", 1)[0]
+        if request_host:
+            backend_host = request_host
+
+    if frontend_host and backend_host and frontend_host != backend_host:
+        return {
+            "httponly": True,
+            "samesite": "None",
+            "secure": True,
+        }
+
+    return {
+        "httponly": True,
+        "samesite": "Lax",
+        "secure": False,
+    }
+
+
+def set_auth_cookies(response, tokens, request=None):
     """Set secure HttpOnly cookies for access and refresh tokens."""
-    response.set_cookie(
-        key="access_token", value=tokens["access"], httponly=True, samesite="Lax"
-    )
-    response.set_cookie(
-        key="refresh_token", value=tokens["refresh"], httponly=True, samesite="Lax"
-    )
+    cookie_options = _get_auth_cookie_options(request=request)
+    response.set_cookie(key="access_token", value=tokens["access"], **cookie_options)
+    response.set_cookie(key="refresh_token", value=tokens["refresh"], **cookie_options)
 
 
 def blacklist_refresh_token(token_string):
