@@ -24,6 +24,7 @@ with open(_LOGO_PATH, "rb") as _f:
 
 
 def _attach_logo(email):
+    """Attach the local binary logo image inline to the outbound email."""
     image = MIMEImage(_LOGO_DATA, _subtype="png")
     image.add_header("Content-ID", "<logo>")
     image.add_header("Content-Disposition", "inline", filename="Logo.png")
@@ -89,10 +90,8 @@ def _get_auth_cookie_options(request=None):
     frontend_host = urlparse(settings.FRONTEND_URL).hostname
     backend_host = urlparse(settings.BACKEND_URL).hostname
 
-    if request is not None:
-        request_host = request.get_host().split(":", 1)[0]
-        if request_host:
-            backend_host = request_host
+    if request is not None and request.get_host().split(":", 1)[0]:
+        backend_host = request.get_host().split(":", 1)[0]
 
     if frontend_host and backend_host and frontend_host != backend_host:
         return {
@@ -101,11 +100,7 @@ def _get_auth_cookie_options(request=None):
             "secure": True,
         }
 
-    return {
-        "httponly": True,
-        "samesite": "Lax",
-        "secure": False,
-    }
+    return {"httponly": True, "samesite": "Lax", "secure": False}
 
 
 def set_auth_cookies(response, tokens, request=None):
@@ -135,18 +130,16 @@ def refresh_access_token(refresh_token_string):
 
 
 def build_password_reset_link(uidb64, token):
+    """Generate the formatted confirmation URL with query strings for the UI."""
     frontend_base = settings.FRONTEND_URL.rstrip("/")
     params = urlencode({"uid": uidb64, "token": token})
     return f"{frontend_base}/pages/auth/confirm_password.html?{params}"
 
 
 def send_password_reset_email(user, uidb64, token):
+    """Render the HTML password reset layout and trigger background delivery."""
     reset_url = build_password_reset_link(uidb64, token)
-
-    context = {
-        "user": user,
-        "reset_url": reset_url,
-    }
+    context = {"user": user, "reset_url": reset_url}
 
     html_content = render_to_string("auth_app/password_reset_email.html", context)
     text_content = strip_tags(html_content)
