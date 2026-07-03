@@ -4,8 +4,6 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-# We will import the Video model here once created
-
 User = get_user_model()
 
 
@@ -40,12 +38,11 @@ class TestVideoListHappyPath:
         self, authenticated_client: APIClient, video_url: str
     ) -> None:
         """Verify that authenticated users can fetch videos sorted by creation date DESC."""
-        # Defer model creation using standard apps registry to avoid import errors before model exists
+
         from django.apps import apps
 
         Video = apps.get_model("video_app", "Video")
 
-        # Create two videos at different times (id 1 older, id 2 newer)
         v1 = Video.objects.create(
             title="Older Movie", description="Desc", category="Drama"
         )
@@ -57,7 +54,7 @@ class TestVideoListHappyPath:
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 2
-        # Check DESC sorting requirement (Newest first)
+
         assert response.data[0]["id"] == v2.id
         assert response.data[1]["id"] == v1.id
 
