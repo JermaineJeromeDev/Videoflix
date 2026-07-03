@@ -97,6 +97,7 @@ Adjust the following values in your `.env` file:
 | `EMAIL_HOST_USER`      | Outbound email authentication account | `your.email@gmail.com`                        |
 | `EMAIL_HOST_PASSWORD`  | 16-character Google App Password      | `abcdefghijklmnop`                            |
 | `FRONTEND_URL`         | Base URL of the frontend client       | `http://localhost:5500`                       |
+| `EMAIL_LOGO_URL`       | Public HTTPS URL of the email logo    | `https://i.postimg.cc/gj1d03gG/Logo.png`      |
 
 **3. Build and launch the Docker containers:**
 
@@ -235,6 +236,7 @@ Passe die folgenden Werte in deiner `.env`-Datei an:
 | `EMAIL_HOST_USER`      | E-Mail-Konto für den Postausgang                 | `deine.email@gmail.com`                       |
 | `EMAIL_HOST_PASSWORD`  | 16-stelliges Google App-Passwort                 | `abcdefghijklmnop`                            |
 | `FRONTEND_URL`         | Basis-URL des Frontend-Clients                   | `http://localhost:5500`                       |
+| `EMAIL_LOGO_URL`       | Oeffentliche HTTPS-URL fuer das E-Mail-Logo      | `https://i.postimg.cc/gj1d03gG/Logo.png`      |
 
 **3. Docker-Container bauen und starten:**
 

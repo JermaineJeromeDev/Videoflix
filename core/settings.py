@@ -169,6 +169,7 @@ AUTH_USER_MODEL = "auth_app.CustomUser"
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5500")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
 # CORS-Freigabe basierend auf den DA-Ports und Standard-Framework-Ports
 CORS_ALLOWED_ORIGINS = [

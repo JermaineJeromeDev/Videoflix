@@ -19,12 +19,23 @@ User = get_user_model()
 _LOGO_PATH = os.path.join(
     os.path.dirname(__file__), "static", "auth_app", "images", "Logo.png"
 )
-with open(_LOGO_PATH, "rb") as _f:
-    _LOGO_DATA = _f.read()
+_LOGO_DATA = None
+if os.path.exists(_LOGO_PATH):
+    with open(_LOGO_PATH, "rb") as _f:
+        _LOGO_DATA = _f.read()
+
+
+def _get_email_logo_url():
+    """Return the public logo URL for emails, if configured."""
+    logo_url = getattr(settings, "EMAIL_LOGO_URL", "").strip()
+    return logo_url or None
 
 
 def _attach_logo(email):
     """Attach the local binary logo image inline to the outbound email."""
+    if not _LOGO_DATA:
+        return
+
     image = MIMEImage(_LOGO_DATA, _subtype="png")
     image.add_header("Content-ID", "<logo>")
     image.add_header("Content-Disposition", "inline", filename="Logo.png")
@@ -46,6 +57,7 @@ def send_activation_email(user, token):
         "user": user,
         "activate_url": frontend_link,
         "site_url": site_url,
+        "logo_url": _get_email_logo_url(),
     }
     html_content = render_to_string("auth_app/activation_email.html", context)
     text_content = strip_tags(html_content)
@@ -139,7 +151,11 @@ def build_password_reset_link(uidb64, token):
 def send_password_reset_email(user, uidb64, token):
     """Render the HTML password reset layout and trigger background delivery."""
     reset_url = build_password_reset_link(uidb64, token)
-    context = {"user": user, "reset_url": reset_url}
+    context = {
+        "user": user,
+        "reset_url": reset_url,
+        "logo_url": _get_email_logo_url(),
+    }
 
     html_content = render_to_string("auth_app/password_reset_email.html", context)
     text_content = strip_tags(html_content)
@@ -185,6 +201,7 @@ def send_async_email(subject, message, recipient_list, html_message=None):
 
     if html_message:
         email.attach_alternative(html_message, "text/html")
-        _attach_logo(email)
+        if "cid:logo" in html_message:
+            _attach_logo(email)
 
     email.send(fail_silently=False)
