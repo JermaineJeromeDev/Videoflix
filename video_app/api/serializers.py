@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 
 from ..models import Video
@@ -22,8 +23,16 @@ class VideoSerializer(serializers.ModelSerializer):
         ]
 
     def get_thumbnail_url(self, obj):
-        """Return the absolute URL of the thumbnail image if it exists."""
+        """Return an absolute thumbnail URL if a generated thumbnail exists."""
+        if not obj.thumbnail:
+            return None
+
         request = self.context.get("request")
-        if obj.thumbnail and request:
+        if request is not None:
             return request.build_absolute_uri(obj.thumbnail.url)
+
+        backend_url = getattr(settings, "BACKEND_URL", "").rstrip("/")
+        if backend_url:
+            return f"{backend_url}{obj.thumbnail.url}"
+
         return None

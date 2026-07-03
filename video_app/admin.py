@@ -8,6 +8,7 @@ class VideoAdmin(admin.ModelAdmin):
 
     list_display = ("title", "category", "created_at")
     search_fields = ("title", "category")
+    readonly_fields = ("thumbnail",)
 
 
 admin.site.register(Video, VideoAdmin)
