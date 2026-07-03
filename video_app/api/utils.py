@@ -91,3 +91,6 @@ def convert_to_hls_async(video_id, file_path, resolution, scale):
         os.path.join(out_dir, "index.m3u8"),
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    if resolution == "1080p" and os.path.exists(file_path):
+        os.remove(file_path)
