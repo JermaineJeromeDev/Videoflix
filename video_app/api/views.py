@@ -1,3 +1,4 @@
+from django.core.files.storage import storages
 from django.http import FileResponse, Http404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -25,32 +26,40 @@ class VideoListView(APIView):
 
 
 class HLSManifestView(APIView):
-    """API endpoint to stream secure HLS .m3u8 playlists."""
+    """Stream secure HLS .m3u8 playlists from the configured file storage."""
 
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, movie_id, resolution):
-        """Open and return the requested m3u8 file as a secure FileResponse."""
+        """Open and return the requested playlist as a secure FileResponse."""
         file_path = get_hls_manifest_file(movie_id, resolution)
         if not file_path:
             raise Http404("Manifest file not found.")
 
-        file_handle = open(file_path, "rb")
+        storage = storages["default"]
+        if not storage.exists(file_path):
+            raise Http404("Manifest file not found in storage.")
+
+        file_handle = storage.open(file_path, "rb")
         return FileResponse(file_handle, content_type="application/vnd.apple.mpegurl")
 
 
 class HLSSegmentView(APIView):
-    """API endpoint to stream secure bin HLS .ts video segments."""
+    """Stream secure HLS .ts video segments from the configured file storage."""
 
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, movie_id, resolution, segment):
-        """Open and return the requested ts file as a secure FileResponse."""
+        """Open and return the requested segment as a secure FileResponse."""
         file_path = get_hls_segment_file(movie_id, resolution, segment)
         if not file_path:
             raise Http404("Segment file not found.")
 
-        file_handle = open(file_path, "rb")
+        storage = storages["default"]
+        if not storage.exists(file_path):
+            raise Http404("Segment file not found in storage.")
+
+        file_handle = storage.open(file_path, "rb")
         return FileResponse(file_handle, content_type="video/MP2T")
