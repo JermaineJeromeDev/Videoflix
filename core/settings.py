@@ -37,9 +37,8 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
     ","
 )
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200"
-).split(",")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5500")
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", FRONTEND_URL).split(",")
 
 
 # Application definition
@@ -201,7 +200,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5500")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
