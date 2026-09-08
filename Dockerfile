@@ -22,5 +22,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 6. Kopiere den gesamten restlichen Code in den Container
 COPY . /app/
 
-# 7. Der Befehl, den Render zum Starten ausführt (Migrationen + Server-Start)
-CMD python manage.py migrate && gunicorn core.wsgi:application
+# 7. Run migrations, start the RQ worker, and keep Gunicorn in the foreground
+CMD ["sh", "-c", "python manage.py migrate && (python manage.py rqworker default &) && exec gunicorn core.wsgi:application --bind 0.0.0.0:8000"]
