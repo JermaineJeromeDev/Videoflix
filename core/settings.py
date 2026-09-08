@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 # Lädt die Variablen aus der .env Datei
@@ -33,7 +34,9 @@ if not SECRET_KEY:
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # Vorgabe der DA für HOSTS und CORS/CSRF
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
+    ","
+)
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200"
 ).split(",")
@@ -89,24 +92,29 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 
-# Database Konfiguration der DA für PostgreSQL
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", default="videoflix_db"),
-        "USER": os.environ.get("DB_USER", default="videoflix_user"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", default="supersecretpassword"),
-        "HOST": os.environ.get("DB_HOST", default="db"),
-        "PORT": os.environ.get("DB_PORT", default=5432),
+# Database-Konfiguration: DATABASE_URL für Cloud-Deployments, sonst PostgreSQL lokal
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", default="videoflix_db"),
+            "USER": os.environ.get("DB_USER", default="videoflix_user"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", default="supersecretpassword"),
+            "HOST": os.environ.get("DB_HOST", default="db"),
+            "PORT": os.environ.get("DB_PORT", default=5432),
+        }
     }
-}
 
 
-# Redis und RQ-Worker Konfiguration der DA
+# Redis und RQ-Worker-Konfiguration
+REDIS_URL = os.environ.get("REDIS_URL", default="redis://redis:6379/1")
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("REDIS_LOCATION", default="redis://redis:6379/1"),
+        "LOCATION": REDIS_URL,
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": "videoflix",
     }
@@ -114,11 +122,8 @@ CACHES = {
 
 RQ_QUEUES = {
     "default": {
-        "HOST": os.environ.get("REDIS_HOST", default="redis"),
-        "PORT": os.environ.get("REDIS_PORT", default=6379),
-        "DB": os.environ.get("REDIS_DB", default=0),
+        "URL": REDIS_URL,
         "DEFAULT_TIMEOUT": 900,
-        "REDIS_CLIENT_KWARGS": {},
     },
 }
 
@@ -158,10 +163,39 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+USE_S3 = os.environ.get("USE_S3", "False") == "True"
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "access_key": os.environ.get("AWS_ACCESS_KEY_ID"),
+                "secret_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
+                "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
+                "default_acl": "public-read",
+                "querystring_auth": False,
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = (
+        f"{os.environ.get('AWS_S3_ENDPOINT_URL')}"
+        f"/storage/v1/object/public/{os.environ.get('AWS_STORAGE_BUCKET_NAME')}/"
+    )
+else:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -171,13 +205,16 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5500")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
-# CORS-Freigabe basierend auf den DA-Ports und Standard-Framework-Ports
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "http://localhost:4200",
-    "http://127.0.0.1:4200",
-]
+# CORS-Freigabe: Cloud-Frontend dynamisch, lokal mit Standard-Ports
+if os.environ.get("FRONTEND_URL"):
+    CORS_ALLOWED_ORIGINS = [os.environ["FRONTEND_URL"]]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    ]
 CORS_ALLOW_CREDENTIALS = True
 
 # SMTP E-Mail-Konfiguration für echten Versand
