@@ -1,5 +1,5 @@
 # 1. Nutze ein offizielles Python-Image, das perfekt zu deinen Requirements passt
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # 2. Setze Umgebungsvariablen für Python
 ENV PYTHONDONTWRITEBYTECODE=1
