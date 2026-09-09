@@ -39,7 +39,7 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").s
 )
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
-    "http://localhost:5500,https://jermainejeromedev.github.io",
+    "http://localhost:5500,https://videoflix-frontend-five.vercel.app/",
 )
 
 
