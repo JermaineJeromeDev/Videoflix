@@ -27,6 +27,9 @@ class VideoSerializer(serializers.ModelSerializer):
         if not obj.thumbnail:
             return None
 
+        if settings.USE_S3:
+            return f"{settings.MEDIA_URL.rstrip('/')}/{obj.thumbnail.name}"
+
         request = self.context.get("request")
         if request is not None:
             return request.build_absolute_uri(obj.thumbnail.url)
