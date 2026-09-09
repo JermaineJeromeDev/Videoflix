@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -16,6 +17,29 @@ def api_client() -> APIClient:
 def register_url() -> str:
     """Return the endpoint URL for user registration."""
     return "/api/register/"
+
+
+class TestRegistrationCors:
+    """Contain registration CORS behavior that does not require the database."""
+
+    @override_settings(CORS_ALLOWED_ORIGINS=["https://jermainejeromedev.github.io"])
+    def test_registration_preflight_allows_production_frontend(
+        self, api_client: APIClient, register_url: str
+    ) -> None:
+        """Allow the production frontend to preflight the JSON registration request."""
+        response = api_client.options(
+            register_url,
+            HTTP_ORIGIN="https://jermainejeromedev.github.io",
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
+            HTTP_ACCESS_CONTROL_REQUEST_HEADERS="content-type",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert (
+            response["Access-Control-Allow-Origin"]
+            == "https://jermainejeromedev.github.io"
+        )
+        assert response["Access-Control-Allow-Credentials"] == "true"
 
 
 @pytest.mark.django_db

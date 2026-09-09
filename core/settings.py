@@ -37,8 +37,20 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
     ","
 )
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5500")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", FRONTEND_URL).split(",")
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:5500,https://jermainejeromedev.github.io",
+)
+
+
+def _get_origins(value: str) -> list[str]:
+    """Return normalized origins from a comma-separated environment value."""
+    return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
+
+
+CSRF_TRUSTED_ORIGINS = _get_origins(os.getenv("CSRF_TRUSTED_ORIGINS", FRONTEND_URL))
+if "https://jermainejeromedev.github.io" not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append("https://jermainejeromedev.github.io")
 
 
 # Application definition
@@ -204,15 +216,17 @@ BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
 # CORS-Freigabe: Cloud-Frontend dynamisch, lokal mit Standard-Ports
-if os.environ.get("FRONTEND_URL"):
-    CORS_ALLOWED_ORIGINS = [os.environ["FRONTEND_URL"]]
-else:
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:5500",
+CORS_ALLOWED_ORIGINS = _get_origins(FRONTEND_URL)
+CORS_ALLOWED_ORIGINS.extend(
+    origin
+    for origin in (
+        "https://jermainejeromedev.github.io",
         "http://127.0.0.1:5500",
         "http://localhost:4200",
         "http://127.0.0.1:4200",
-    ]
+    )
+    if origin not in CORS_ALLOWED_ORIGINS
+)
 CORS_ALLOW_CREDENTIALS = True
 
 # SMTP E-Mail-Konfiguration für echten Versand
