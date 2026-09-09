@@ -23,4 +23,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # 7. Run migrations, start the RQ worker, and keep Gunicorn in the foreground
-CMD ["sh", "-c", "python manage.py migrate && (python manage.py rqworker default &) && exec gunicorn core.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --log-level info"]
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && (python manage.py rqworker default &) && exec gunicorn core.wsgi:application --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --log-level info"]
