@@ -1,4 +1,7 @@
+import logging
+
 from django.contrib.auth import authenticate
+from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,6 +21,8 @@ from .utils import (
     verify_and_activate_user,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class RegisterView(APIView):
     """API endpoint that allows new guests to register an account."""
@@ -26,9 +31,22 @@ class RegisterView(APIView):
         """Handle incoming registration payloads and trigger activation workflow."""
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            token = generate_activation_token(user)
-            send_activation_email(user, token)
+            try:
+                with transaction.atomic():
+                    user = serializer.save()
+                    token = generate_activation_token(user)
+                    send_activation_email(user, token)
+            except Exception:
+                logger.exception("Registration failed while queuing activation email")
+                return Response(
+                    {
+                        "detail": (
+                            "Registration could not be completed because the "
+                            "activation email could not be queued."
+                        )
+                    },
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
 
             return Response(
                 {"user": {"id": user.id, "email": user.email}},
