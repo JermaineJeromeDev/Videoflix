@@ -39,7 +39,7 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").s
 )
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
-    "http://localhost:5500,https://videoflix-frontend-five.vercel.app/",
+    "http://localhost:5500,https://videoflix-frontend-vercel.vercel.app",
 )
 
 
@@ -218,7 +218,7 @@ CORS_ALLOWED_ORIGINS = _get_origins(FRONTEND_URL)
 CORS_ALLOWED_ORIGINS.extend(
     origin
     for origin in (
-        "https://vercel.app",
+        "https://videoflix-frontend-vercel.vercel.app",
         "https://jermainejeromedev.github.io",
         "http://127.0.0.1:5500",
         "http://localhost:4200",
@@ -229,7 +229,7 @@ CORS_ALLOWED_ORIGINS.extend(
 CSRF_TRUSTED_ORIGINS.extend(
     origin
     for origin in (
-        "https://vercel.app",
+        "https://videoflix-frontend-vercel.vercel.app",
         "http://localhost:4200",
         "http://127.0.0.1:4200",
     )
