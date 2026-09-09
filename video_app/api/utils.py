@@ -1,8 +1,11 @@
 import os
 import posixpath
 import subprocess
+import tempfile
 
 from django.conf import settings
+from django.core.files import File
+from django.core.files.storage import storages
 from django_rq import job
 
 from video_app.models import Video
@@ -40,7 +43,7 @@ def get_hls_segment_file(movie_id, resolution, segment):
 @job
 def extract_thumbnail_from_video(video_id, file_path):
     """Extract a single frame from the video at 1 second using FFMPEG as a thumbnail."""
-    thumb_dir = os.path.join(settings.MEDIA_ROOT, "thumbnails")
+    thumb_dir = os.path.join(tempfile.gettempdir(), "videoflix", "thumbnails")
     os.makedirs(thumb_dir, exist_ok=True)
 
     thumb_filename = f"thumb_{video_id}.jpg"
@@ -53,9 +56,11 @@ def extract_thumbnail_from_video(video_id, file_path):
     )
 
     if generated:
-        Video.objects.filter(id=video_id).update(
-            thumbnail=f"thumbnails/{thumb_filename}"
-        )
+        storage = storages["default"]
+        storage_name = f"thumbnails/{thumb_filename}"
+        with open(thumb_path, "rb") as thumbnail_file:
+            storage.save(storage_name, File(thumbnail_file))
+        Video.objects.filter(id=video_id).update(thumbnail=storage_name)
     else:
 
         Video.objects.filter(id=video_id).update(thumbnail=None)
@@ -64,7 +69,9 @@ def extract_thumbnail_from_video(video_id, file_path):
 @job
 def convert_to_hls_async(video_id, file_path, resolution, scale):
     """Execute the FFMPEG command as a background job to output HLS streams."""
-    out_dir = os.path.join(settings.MEDIA_ROOT, "videos", str(video_id), resolution)
+    out_dir = os.path.join(
+        tempfile.gettempdir(), "videoflix", "videos", str(video_id), resolution
+    )
     os.makedirs(out_dir, exist_ok=True)
 
     cmd = [
@@ -85,5 +92,9 @@ def convert_to_hls_async(video_id, file_path, resolution, scale):
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    if resolution == "1080p" and os.path.exists(file_path):
-        os.remove(file_path)
+    storage = storages["default"]
+    for filename in os.listdir(out_dir):
+        output_path = os.path.join(out_dir, filename)
+        storage_name = f"videos/{video_id}/{resolution}/{filename}"
+        with open(output_path, "rb") as output_file:
+            storage.save(storage_name, File(output_file))
