@@ -11,6 +11,17 @@ from .api.utils import convert_to_hls_async, extract_thumbnail_from_video
 from .models import Video
 
 
+def _delete_storage_tree(storage, directory):
+    """Delete all files and folders below a storage directory."""
+    directories, files = storage.listdir(directory)
+    for filename in files:
+        storage.delete(os.path.join(directory, filename).replace("\\", "/"))
+    for subdirectory in directories:
+        _delete_storage_tree(
+            storage, os.path.join(directory, subdirectory).replace("\\", "/")
+        )
+
+
 @receiver(post_save, sender=Video)
 def queue_video_conversion(sender, instance, created, **kwargs):
     """Trigger background HLS processing and thumbnail extraction when a video is added."""
@@ -33,6 +44,8 @@ def delete_video_files_from_disk(sender, instance, **kwargs):
 
     if instance.thumbnail:
         storage.delete(instance.thumbnail.name)
+
+    _delete_storage_tree(storage, f"videos/{instance.id}")
 
     hls_folder = os.path.join(
         getattr(settings, "MEDIA_ROOT", tempfile.gettempdir()),
