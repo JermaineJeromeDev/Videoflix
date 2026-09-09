@@ -62,7 +62,7 @@ def send_activation_email(user, token):
     html_content = render_to_string("auth_app/activation_email.html", context)
     text_content = strip_tags(html_content)
 
-    send_async_email(
+    send_async_email.delay(
         "Activate your Videoflix Account",
         text_content,
         [user.email],
@@ -160,7 +160,7 @@ def send_password_reset_email(user, uidb64, token):
     html_content = render_to_string("auth_app/password_reset_email.html", context)
     text_content = strip_tags(html_content)
 
-    send_async_email(
+    send_async_email.delay(
         "Reset your Videoflix Password",
         text_content,
         [user.email],
