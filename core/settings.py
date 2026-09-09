@@ -219,7 +219,6 @@ CORS_ALLOWED_ORIGINS.extend(
     origin
     for origin in (
         "https://videoflix-frontend-five.vercel.app",
-        "https://jermainejeromedev.github.io",
         "http://127.0.0.1:5500",
         "http://localhost:4200",
         "http://127.0.0.1:4200",
