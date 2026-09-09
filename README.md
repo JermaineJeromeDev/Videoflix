@@ -91,7 +91,7 @@ Adjust the following values in your `.env` file:
 | `DB_NAME`, `DB_USER`   | PostgreSQL target database & owner    | `videoflix_db`, `videoflix_admin`             |
 | `DB_PASSWORD`          | PostgreSQL user password              | `passwort123`                                 |
 | `DB_HOST`, `DB_PORT`   | PostgreSQL host and port              | `db`, `5432`                                  |
-| `REDIS_LOCATION`       | Full connection URI for Redis cache   | `redis://redis:6379/1`                        |
+| `REDIS_URL`            | Full connection URI for Redis cache   | `redis://redis:6379/1`                        |
 | `EMAIL_HOST`           | SMTP Server Host                      | `://gmail.com`                                |
 | `EMAIL_PORT`           | SMTP Server Port                      | `587`                                         |
 | `EMAIL_HOST_USER`      | Outbound email authentication account | `your.email@gmail.com`                        |
@@ -230,7 +230,7 @@ Passe die folgenden Werte in deiner `.env`-Datei an:
 | `DB_NAME`, `DB_USER`   | PostgreSQL Datenbankname & Besitzer              | `videoflix_db`, `videoflix_admin`             |
 | `DB_PASSWORD`          | Passwort des Datenbank-Benutzers                 | `passwort123`                                 |
 | `DB_HOST`, `DB_PORT`   | Hostname und Port für PostgreSQL                 | `db`, `5432`                                  |
-| `REDIS_LOCATION`       | Verbindungs-URI für den Redis-Cache              | `redis://redis:6379/1`                        |
+| `REDIS_URL`            | Verbindungs-URI für den Redis-Cache              | `redis://redis:6379/1`                        |
 | `EMAIL_HOST`           | SMTP-Server-Adresse                              | `://gmail.com`                                |
 | `EMAIL_PORT`           | SMTP-Server-Port                                 | `587`                                         |
 | `EMAIL_HOST_USER`      | E-Mail-Konto für den Postausgang                 | `deine.email@gmail.com`                       |

@@ -118,15 +118,12 @@ else:
 
 
 # Redis und RQ-Worker-Konfiguration
-REDIS_LOCATION = os.environ.get(
-    "REDIS_LOCATION",
-    os.environ.get("REDIS_URL", default="redis://redis:6379/1"),
-)
+REDIS_URL = os.environ.get("REDIS_URL", default="redis://redis:6379/1")
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_LOCATION,
+        "LOCATION": REDIS_URL,
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": "videoflix",
     }
@@ -134,7 +131,7 @@ CACHES = {
 
 RQ_QUEUES = {
     "default": {
-        "URL": REDIS_LOCATION,
+        "URL": REDIS_URL,
         "DEFAULT_TIMEOUT": 900,
     },
 }
