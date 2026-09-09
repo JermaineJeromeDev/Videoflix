@@ -49,8 +49,6 @@ def _get_origins(value: str) -> list[str]:
 
 
 CSRF_TRUSTED_ORIGINS = _get_origins(os.getenv("CSRF_TRUSTED_ORIGINS", FRONTEND_URL))
-if "https://jermainejeromedev.github.io" not in CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS.append("https://jermainejeromedev.github.io")
 
 
 # Application definition
@@ -223,12 +221,22 @@ CORS_ALLOWED_ORIGINS = _get_origins(FRONTEND_URL)
 CORS_ALLOWED_ORIGINS.extend(
     origin
     for origin in (
+        "https://vercel.app",
         "https://jermainejeromedev.github.io",
         "http://127.0.0.1:5500",
         "http://localhost:4200",
         "http://127.0.0.1:4200",
     )
     if origin not in CORS_ALLOWED_ORIGINS
+)
+CSRF_TRUSTED_ORIGINS.extend(
+    origin
+    for origin in (
+        "https://vercel.app",
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    )
+    if origin not in CSRF_TRUSTED_ORIGINS
 )
 CORS_ALLOW_CREDENTIALS = True
 
