@@ -11,6 +11,22 @@ from django_rq import job
 from video_app.models import Video
 
 
+def _download_video_to_temp(video_id, source_name):
+    """Download a stored source video to a local path for FFmpeg."""
+    if os.path.exists(source_name):
+        return source_name, False
+
+    source_path = os.path.join(
+        tempfile.gettempdir(), "videoflix", f"source_{video_id}.mp4"
+    )
+    os.makedirs(os.path.dirname(source_path), exist_ok=True)
+    storage = storages["default"]
+    with storage.open(source_name, "rb") as source:
+        with open(source_path, "wb") as destination:
+            destination.write(source.read())
+    return source_path, True
+
+
 def _run_thumbnail_capture(file_path, thumb_path, timestamp):
     """Run ffmpeg for a single timestamp and report whether a file was produced."""
     cmd = [
@@ -41,8 +57,9 @@ def get_hls_segment_file(movie_id, resolution, segment):
 
 
 @job
-def extract_thumbnail_from_video(video_id, file_path):
+def extract_thumbnail_from_video(video_id, source_name):
     """Extract a single frame from the video at 1 second using FFMPEG as a thumbnail."""
+    file_path, temporary = _download_video_to_temp(video_id, source_name)
     thumb_dir = os.path.join(tempfile.gettempdir(), "videoflix", "thumbnails")
     os.makedirs(thumb_dir, exist_ok=True)
 
@@ -65,10 +82,14 @@ def extract_thumbnail_from_video(video_id, file_path):
 
         Video.objects.filter(id=video_id).update(thumbnail=None)
 
+    if temporary and os.path.exists(file_path):
+        os.remove(file_path)
+
 
 @job
-def convert_to_hls_async(video_id, file_path, resolution, scale):
+def convert_to_hls_async(video_id, source_name, resolution, scale):
     """Execute the FFMPEG command as a background job to output HLS streams."""
+    file_path, temporary = _download_video_to_temp(video_id, source_name)
     out_dir = os.path.join(
         tempfile.gettempdir(), "videoflix", "videos", str(video_id), resolution
     )
@@ -90,7 +111,10 @@ def convert_to_hls_async(video_id, file_path, resolution, scale):
         "hls",
         os.path.join(out_dir, "index.m3u8"),
     ]
-    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    result = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    manifest_path = os.path.join(out_dir, "index.m3u8")
+    if result.returncode != 0 or not os.path.exists(manifest_path):
+        raise RuntimeError(f"FFmpeg failed to create {resolution} HLS output")
 
     storage = storages["default"]
     for filename in os.listdir(out_dir):
@@ -98,3 +122,6 @@ def convert_to_hls_async(video_id, file_path, resolution, scale):
         storage_name = f"videos/{video_id}/{resolution}/{filename}"
         with open(output_path, "rb") as output_file:
             storage.save(storage_name, File(output_file))
+
+    if temporary and os.path.exists(file_path):
+        os.remove(file_path)
