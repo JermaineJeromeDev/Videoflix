@@ -175,6 +175,8 @@ STATIC_ROOT = BASE_DIR / "static"
 USE_S3 = os.environ.get("USE_S3", "False") == "True"
 
 if USE_S3:
+    S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "").rstrip("/")
+    S3_PUBLIC_BASE_URL = S3_ENDPOINT_URL.removesuffix("/storage/v1/s3")
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
@@ -182,8 +184,10 @@ if USE_S3:
                 "access_key": os.environ.get("AWS_ACCESS_KEY_ID"),
                 "secret_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
                 "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
-                "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
-                "default_acl": "public-read",
+                "endpoint_url": S3_ENDPOINT_URL,
+                "region_name": os.environ.get("AWS_S3_REGION_NAME", "eu-central-1"),
+                "signature_version": "s3v4",
+                "addressing_style": "path",
                 "querystring_auth": False,
                 "file_overwrite": False,
             },
@@ -193,7 +197,7 @@ if USE_S3:
         },
     }
     MEDIA_URL = (
-        f"{os.environ.get('AWS_S3_ENDPOINT_URL')}"
+        f"{S3_PUBLIC_BASE_URL}"
         f"/storage/v1/object/public/{os.environ.get('AWS_STORAGE_BUCKET_NAME')}/"
     )
 else:
