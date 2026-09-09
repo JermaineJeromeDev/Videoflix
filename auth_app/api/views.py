@@ -29,30 +29,30 @@ class RegisterView(APIView):
 
     def post(self, request):
         """Handle incoming registration payloads and trigger activation workflow."""
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
+        try:
+            serializer = RegisterSerializer(data=request.data)
+            if serializer.is_valid():
                 with transaction.atomic():
                     user = serializer.save()
                     token = generate_activation_token(user)
                     send_activation_email(user, token)
-            except Exception:
-                logger.exception("Registration failed while queuing activation email")
-                return Response(
-                    {
-                        "detail": (
-                            "Registration could not be completed because the "
-                            "activation email could not be queued."
-                        )
-                    },
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
 
+                return Response(
+                    {"user": {"id": user.id, "email": user.email}},
+                    status=status.HTTP_201_CREATED,
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.exception("Registration request failed unexpectedly")
             return Response(
-                {"user": {"id": user.id, "email": user.email}},
-                status=status.HTTP_201_CREATED,
+                {
+                    "detail": (
+                        "Registration is temporarily unavailable. "
+                        "Please try again later."
+                    )
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ActivateView(APIView):
