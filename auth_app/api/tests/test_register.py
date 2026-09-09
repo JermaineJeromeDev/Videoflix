@@ -81,8 +81,8 @@ class TestRegisterUnhappyPath:
         response = api_client.post(register_url, payload, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        error_msg = str(response.data)
-        assert "Bitte überprüfe deine Eingaben und versuche es erneut." in error_msg
+        assert "confirmed_password" in response.data
+        assert "stimmen nicht überein" in str(response.data)
 
     def test_registration_email_already_exists(
         self, api_client: APIClient, register_url: str
@@ -98,5 +98,5 @@ class TestRegisterUnhappyPath:
         response = api_client.post(register_url, payload, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        error_msg = str(response.data)
-        assert "Bitte überprüfe deine Eingaben und versuche es erneut." in error_msg
+        assert "email" in response.data
+        assert "existiert bereits" in str(response.data)

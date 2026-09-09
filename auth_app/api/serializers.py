@@ -22,11 +22,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         """Verify that passwords match and the email is not already taken."""
         if data["password"] != data["confirmed_password"]:
             raise serializers.ValidationError(
-                "Bitte überprüfe deine Eingaben und versuche es erneut."
+                {"confirmed_password": "Die Passwörter stimmen nicht überein."}
             )
         if User.objects.filter(email=data["email"]).exists():
             raise serializers.ValidationError(
-                "Bitte überprüfe deine Eingaben und versuche es erneut."
+                {"email": "Für diese E-Mail-Adresse existiert bereits ein Konto."}
             )
         return data
 
