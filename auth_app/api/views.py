@@ -47,15 +47,10 @@ class RegisterView(APIView):
                     user = serializer.save()
                     token = generate_activation_token(user)
 
-                original_timeout = socket.getdefaulttimeout()
-                socket.setdefaulttimeout(3.0)
-
                 try:
                     send_activation_email(user, token)
                 except Exception as mail_err:
-                    logger.error(f"Gmail connection failed or blocked: {mail_err}")
-                finally:
-                    socket.setdefaulttimeout(original_timeout)
+                    logger.error(f"SMTP email connection failed or blocked: {mail_err}")
 
                 return Response(
                     {"user": {"id": user.id, "email": user.email}},
