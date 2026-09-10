@@ -35,7 +35,11 @@ class RegisterView(APIView):
                 with transaction.atomic():
                     user = serializer.save()
                     token = generate_activation_token(user)
+
+                try:
                     send_activation_email(user, token)
+                except Exception as mail_err:
+                    logger.error(f"Failed to send activation email: {mail_err}")
 
                 return Response(
                     {"user": {"id": user.id, "email": user.email}},
@@ -149,7 +153,7 @@ class TokenRefreshView(APIView):
         response.set_cookie(
             key="access_token",
             value=new_access,
-            **_get_auth_cookie_options(request=request)
+            **_get_auth_cookie_options(request=request),
         )
         return response
 
