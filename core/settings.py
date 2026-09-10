@@ -16,22 +16,15 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-# Lädt die Variablen aus der .env Datei
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://djangoproject.com stable/howto/deployment/checklist/
-
-
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY is not set in the environment variables.")
 
-
 DEBUG = os.getenv("DEBUG", "True") == "True"
+
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -258,16 +251,18 @@ if "https://videoflix-frontend-five.vercel.app" not in CSRF_TRUSTED_ORIGINS:
 CORS_ALLOW_CREDENTIALS = True
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "://brevo.com")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "b8c825001@smtp-brevo.com")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = str(os.getenv("EMAIL_USE_TLS", "True")).strip().lower() in ["true", "1"]
 EMAIL_USE_SSL = str(os.getenv("EMAIL_USE_SSL", "False")).strip().lower() in [
     "true",
     "1",
 ]
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "jermainejerome.dev@gmail.com")
+
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
 
 LOGGING = {
     "version": 1,
