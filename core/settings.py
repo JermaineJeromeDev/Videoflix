@@ -40,8 +40,8 @@ ALLOWED_HOSTS = [
     )
     if host.strip()
 ]
-if "videoflix-three.vercel.app" not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append("videoflix-three.vercel.app")
+if "jermainejeromedev.pythonanywhere.com" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("jermainejeromedev.pythonanywhere.com")
 
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
@@ -220,7 +220,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://jermainejeromedev.pythonanywhere.com")
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
 # CORS-Freigabe: Cloud-Frontend dynamisch, lokal mit Standard-Ports
