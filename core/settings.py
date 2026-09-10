@@ -35,17 +35,14 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
-        ","
-    )
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        default="localhost,127.0.0.1,videoflix-production-d706.up.railway.app",
+    ).split(",")
     if host.strip()
 ]
-for backend_host in (
-    "jermainejeromedev.pythonanywhere.com",
-    "videoflix-production-d706.up.railway.app",
-):
-    if backend_host not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(backend_host)
+if "videoflix-production-d706.up.railway.app" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("videoflix-production-d706.up.railway.app")
 
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
