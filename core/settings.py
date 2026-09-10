@@ -40,9 +40,16 @@ ALLOWED_HOSTS = [
     )
     if host.strip()
 ]
+for backend_host in (
+    "jermainejeromedev.pythonanywhere.com",
+    "videoflix-production-d706.up.railway.app",
+):
+    if backend_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(backend_host)
 
 FRONTEND_URL = os.getenv(
-    "FRONTEND_URL", "http://localhost:5500, https://videoflix-frontend-five.vercel.app"
+    "FRONTEND_URL",
+    "http://localhost:5500,https://videoflix-frontend-five.vercel.app",
 )
 
 
@@ -51,9 +58,7 @@ def _get_origins(value: str) -> list[str]:
     return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://videoflix-frontend-five.vercel.app",
-]
+CSRF_TRUSTED_ORIGINS = _get_origins(os.getenv("CSRF_TRUSTED_ORIGINS", FRONTEND_URL))
 
 
 # Application definition
@@ -236,6 +241,8 @@ CORS_ALLOWED_ORIGINS.extend(
     )
     if origin not in CORS_ALLOWED_ORIGINS
 )
+if "https://videoflix-frontend-five.vercel.app" not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
 CSRF_TRUSTED_ORIGINS.extend(
     origin
     for origin in (
@@ -245,6 +252,8 @@ CSRF_TRUSTED_ORIGINS.extend(
     )
     if origin not in CSRF_TRUSTED_ORIGINS
 )
+if "https://videoflix-frontend-five.vercel.app" not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
 CORS_ALLOW_CREDENTIALS = True
 
 # SMTP E-Mail-Konfiguration für echten Versand
