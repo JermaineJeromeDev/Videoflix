@@ -257,18 +257,17 @@ if "https://videoflix-frontend-five.vercel.app" not in CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
 CORS_ALLOW_CREDENTIALS = True
 
-# SMTP E-Mail-Konfiguration für echten Versand
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "://brevo.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "b8c825001@smtp-brevo.com")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = str(os.getenv("EMAIL_USE_TLS", "True")).strip().lower() in ["true", "1"]
 EMAIL_USE_SSL = str(os.getenv("EMAIL_USE_SSL", "False")).strip().lower() in [
     "true",
     "1",
 ]
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "jermainejerome.dev@gmail.com")
 
 LOGGING = {
     "version": 1,
