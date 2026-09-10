@@ -24,6 +24,17 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
+import socket
+
+from django.db import transaction
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import RegisterSerializer
+from .utils import generate_activation_token, send_activation_email
+
+
 class RegisterView(APIView):
     """API endpoint that allows new guests to register an account."""
 
@@ -36,10 +47,15 @@ class RegisterView(APIView):
                     user = serializer.save()
                     token = generate_activation_token(user)
 
+                original_timeout = socket.getdefaulttimeout()
+                socket.setdefaulttimeout(3.0)
+
                 try:
                     send_activation_email(user, token)
                 except Exception as mail_err:
-                    logger.error(f"Failed to send activation email: {mail_err}")
+                    logger.error(f"Gmail connection failed or blocked: {mail_err}")
+                finally:
+                    socket.setdefaulttimeout(original_timeout)
 
                 return Response(
                     {"user": {"id": user.id, "email": user.email}},
@@ -50,10 +66,7 @@ class RegisterView(APIView):
             logger.exception("Registration request failed unexpectedly")
             return Response(
                 {
-                    "detail": (
-                        "Registration is temporarily unavailable. "
-                        "Please try again later."
-                    )
+                    "detail": "Registration is temporarily unavailable. Please try again later."
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
