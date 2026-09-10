@@ -33,9 +33,15 @@ if not SECRET_KEY:
 
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
-    ","
-)
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
+        ","
+    )
+    if host.strip()
+]
+if "videoflix-three.vercel.app" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("videoflix-three.vercel.app")
 
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",

@@ -86,8 +86,8 @@ Adjust the following values in your `.env` file:
 | :--------------------- | :------------------------------------ | :-------------------------------------------- |
 | `SECRET_KEY`           | Django cryptographic signing key      | _Your secure key_                             |
 | `DEBUG`                | Django debug toggle                   | `True`                                        |
-| `ALLOWED_HOSTS`        | Allowed backend hostnames             | `localhost,127.0.0.1`                         |
-| `CSRF_TRUSTED_ORIGINS` | Trusted origins for secure requests   | `http://localhost:5500,http://127.0.0.1:5500` |
+| `ALLOWED_HOSTS`        | Allowed backend hostnames             | `localhost,127.0.0.1,videoflix-three.vercel.app` |
+| `CSRF_TRUSTED_ORIGINS` | Trusted origins for secure requests   | `http://localhost:5500,http://127.0.0.1:5500,https://videoflix-frontend-five.vercel.app` |
 | `DB_NAME`, `DB_USER`   | PostgreSQL target database & owner    | `videoflix_db`, `videoflix_admin`             |
 | `DB_PASSWORD`          | PostgreSQL user password              | `passwort123`                                 |
 | `DB_HOST`, `DB_PORT`   | PostgreSQL host and port              | `db`, `5432`                                  |
@@ -96,7 +96,7 @@ Adjust the following values in your `.env` file:
 | `EMAIL_PORT`           | SMTP Server Port                      | `587`                                         |
 | `EMAIL_HOST_USER`      | Outbound email authentication account | `your.email@gmail.com`                        |
 | `EMAIL_HOST_PASSWORD`  | 16-character Google App Password      | `abcdefghijklmnop`                            |
-| `FRONTEND_URL`         | Base URL of the frontend client       | `http://localhost:5500`                       |
+| `FRONTEND_URL`         | Base URL of the frontend client       | `http://localhost:5500,https://videoflix-frontend-five.vercel.app` |
 | `EMAIL_LOGO_URL`       | Public HTTPS URL of the email logo    | `https://i.postimg.cc/gj1d03gG/Logo.png`      |
 
 **3. Build and launch the Docker containers:**
@@ -225,8 +225,8 @@ Passe die folgenden Werte in deiner `.env`-Datei an:
 | :--------------------- | :----------------------------------------------- | :-------------------------------------------- |
 | `SECRET_KEY`           | Kryptografischer Sicherheitsschlüssel für Django | _Dein sicherer Key_                           |
 | `DEBUG`                | Aktiviert/Deaktiviert den Django-Debug-Modus     | `True`                                        |
-| `ALLOWED_HOSTS`        | Erlaubte Hostnamen für das Backend               | `localhost,127.0.0.1`                         |
-| `CSRF_TRUSTED_ORIGINS` | Vertrauenswürdige Herkunfts-URLs für Formulare   | `http://localhost:5500,http://127.0.0.1:5500` |
+| `ALLOWED_HOSTS`        | Erlaubte Hostnamen für das Backend               | `localhost,127.0.0.1,videoflix-three.vercel.app` |
+| `CSRF_TRUSTED_ORIGINS` | Vertrauenswürdige Herkunfts-URLs für Formulare   | `http://localhost:5500,http://127.0.0.1:5500,https://videoflix-frontend-five.vercel.app` |
 | `DB_NAME`, `DB_USER`   | PostgreSQL Datenbankname & Besitzer              | `videoflix_db`, `videoflix_admin`             |
 | `DB_PASSWORD`          | Passwort des Datenbank-Benutzers                 | `passwort123`                                 |
 | `DB_HOST`, `DB_PORT`   | Hostname und Port für PostgreSQL                 | `db`, `5432`                                  |
@@ -235,7 +235,7 @@ Passe die folgenden Werte in deiner `.env`-Datei an:
 | `EMAIL_PORT`           | SMTP-Server-Port                                 | `587`                                         |
 | `EMAIL_HOST_USER`      | E-Mail-Konto für den Postausgang                 | `deine.email@gmail.com`                       |
 | `EMAIL_HOST_PASSWORD`  | 16-stelliges Google App-Passwort                 | `abcdefghijklmnop`                            |
-| `FRONTEND_URL`         | Basis-URL des Frontend-Clients                   | `http://localhost:5500`                       |
+| `FRONTEND_URL`         | Basis-URL des Frontend-Clients                   | `http://localhost:5500,https://videoflix-frontend-five.vercel.app` |
 | `EMAIL_LOGO_URL`       | Oeffentliche HTTPS-URL fuer das E-Mail-Logo      | `https://i.postimg.cc/gj1d03gG/Logo.png`      |
 
 **3. Docker-Container bauen und starten:**
