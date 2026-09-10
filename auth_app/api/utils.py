@@ -1,5 +1,4 @@
 import os
-from email.mime.image import MIMEImage
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -16,30 +15,10 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 User = get_user_model()
 
 
-_LOGO_PATH = os.path.join(
-    os.path.dirname(__file__), "static", "auth_app", "images", "Logo.png"
-)
-_LOGO_DATA = None
-if os.path.exists(_LOGO_PATH):
-    with open(_LOGO_PATH, "rb") as _f:
-        _LOGO_DATA = _f.read()
-
-
 def _get_email_logo_url():
-    """Return the public logo URL for emails, if configured."""
+    """Gibt die in Railway konfigurierte, öffentliche Logo-URL zurück."""
     logo_url = getattr(settings, "EMAIL_LOGO_URL", "").strip()
-    return logo_url or None
-
-
-def _attach_logo(email):
-    """Attach the local binary logo image inline to the outbound email."""
-    if not _LOGO_DATA:
-        return
-
-    image = MIMEImage(_LOGO_DATA, _subtype="png")
-    image.add_header("Content-ID", "<logo>")
-    image.add_header("Content-Disposition", "inline", filename="Logo.png")
-    email.attach(image)
+    return logo_url if logo_url else None
 
 
 def generate_activation_token(user):
@@ -193,7 +172,7 @@ def reset_user_password(user, token, new_password):
 
 @job
 def send_async_email(subject, message, recipient_list, html_message=None):
-    """Send a secure development email asynchronously via background worker."""
+    """Send a secure email asynchronously via background worker using Anymail API."""
     email = EmailMultiAlternatives(
         subject=subject,
         body=message,
@@ -203,7 +182,5 @@ def send_async_email(subject, message, recipient_list, html_message=None):
 
     if html_message:
         email.attach_alternative(html_message, "text/html")
-        if "cid:logo" in html_message:
-            _attach_logo(email)
 
     email.send(fail_silently=False)

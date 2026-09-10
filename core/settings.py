@@ -259,6 +259,8 @@ ANYMAIL = {
 
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
+EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
+
 
 LOGGING = {
     "version": 1,
