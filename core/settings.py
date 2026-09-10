@@ -42,8 +42,7 @@ ALLOWED_HOSTS = [
 ]
 
 FRONTEND_URL = os.getenv(
-    "FRONTEND_URL",
-    "http://localhost:5500,https://videoflix-frontend-five.vercel.app",
+    "FRONTEND_URL", "http://localhost:5500, https://videoflix-frontend-five.vercel.app"
 )
 
 
@@ -52,7 +51,9 @@ def _get_origins(value: str) -> list[str]:
     return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
 
 
-CSRF_TRUSTED_ORIGINS = _get_origins(os.getenv("CSRF_TRUSTED_ORIGINS", FRONTEND_URL))
+CSRF_TRUSTED_ORIGINS = [
+    "https://videoflix-frontend-five.vercel.app",
+]
 
 
 # Application definition
@@ -218,7 +219,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
-BACKEND_URL = os.getenv("BACKEND_URL", "https://jermainejeromedev.pythonanywhere.com")
+BACKEND_URL = os.getenv(
+    "BACKEND_URL", "https://videoflix-production-d706.up.railway.app"
+)
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
 # CORS-Freigabe: Cloud-Frontend dynamisch, lokal mit Standard-Ports
@@ -270,3 +273,8 @@ LOGGING = {
         },
     },
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "https://videoflix-frontend-five.vercel.app",
+    "http://localhost:5500",
+]
