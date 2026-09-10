@@ -33,10 +33,10 @@ if not SECRET_KEY:
 
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-# Vorgabe der DA für HOSTS und CORS/CSRF
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(
     ","
 )
+
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
     "http://localhost:5500,https://videoflix-frontend-five.vercel.app",
