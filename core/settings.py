@@ -228,22 +228,26 @@ EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 
 # CORS-Freigabe: Cloud-Frontend dynamisch, lokal mit Standard-Ports
 CORS_ALLOWED_ORIGINS = _get_origins(FRONTEND_URL)
+if "https://videoflix-frontend-five.vercel.app" not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
+
 CORS_ALLOWED_ORIGINS.extend(
     origin
     for origin in (
         "https://videoflix-frontend-five.vercel.app",
         "http://127.0.0.1:5500",
+        "http://localhost:5500",
         "http://localhost:4200",
         "http://127.0.0.1:4200",
     )
     if origin not in CORS_ALLOWED_ORIGINS
 )
-if "https://videoflix-frontend-five.vercel.app" not in CORS_ALLOWED_ORIGINS:
-    CORS_ALLOWED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
+
 CSRF_TRUSTED_ORIGINS.extend(
     origin
     for origin in (
         "https://videoflix-frontend-five.vercel.app",
+        "http://localhost:5500",
         "http://localhost:4200",
         "http://127.0.0.1:4200",
     )
@@ -279,8 +283,3 @@ LOGGING = {
         },
     },
 }
-
-CORS_ALLOWED_ORIGINS = [
-    "https://videoflix-frontend-five.vercel.app",
-    "http://localhost:5500",
-]
