@@ -48,7 +48,7 @@ def generate_activation_token(user):
 
 
 def send_activation_email(user, token):
-    """Render the HTML activation template and queue the background task."""
+    """Render the HTML activation template and send via Anymail API."""
     uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
     frontend_link = f"{settings.FRONTEND_URL.rstrip('/')}/pages/auth/activate.html?uid={uidb64}&token={token}"
     site_url = settings.BACKEND_URL.rstrip("/")
@@ -62,12 +62,14 @@ def send_activation_email(user, token):
     html_content = render_to_string("auth_app/activation_email.html", context)
     text_content = strip_tags(html_content)
 
-    send_async_email(
-        "Activate your Videoflix Account",
-        text_content,
-        [user.email],
-        html_message=html_content,
+    msg = EmailMultiAlternatives(
+        subject="Activate your Videoflix Account",
+        body=text_content,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
     )
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
 
 def get_user_from_uidb64(uidb64):
