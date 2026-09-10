@@ -40,8 +40,6 @@ ALLOWED_HOSTS = [
     )
     if host.strip()
 ]
-if "jermainejeromedev.pythonanywhere.com" not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append("jermainejeromedev.pythonanywhere.com")
 
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
