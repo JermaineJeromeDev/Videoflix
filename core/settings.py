@@ -37,9 +37,11 @@ ALLOWED_HOSTS = [
 if "videoflix-production-d706.up.railway.app" not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append("videoflix-production-d706.up.railway.app")
 
+CORS_ALLOW_CREDENTIALS = True
+
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
-    "http://localhost:5500,https://videoflix-frontend-five.vercel.app",
+    "http://localhost:5500,https://videoflix.jermaine-jerome-baerwolf.de",
 )
 
 
@@ -48,7 +50,35 @@ def _get_origins(value: str) -> list[str]:
     return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
 
 
-CSRF_TRUSTED_ORIGINS = _get_origins(os.getenv("CSRF_TRUSTED_ORIGINS", FRONTEND_URL))
+CORS_ALLOWED_ORIGINS = _get_origins(FRONTEND_URL)
+
+CORS_ALLOWED_ORIGINS.extend(
+    [
+        "https://videoflix.jermaine-jerome-baerwolf.de",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    ]
+)
+
+CORS_ALLOWED_ORIGINS = list(set(CORS_ALLOWED_ORIGINS))
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.railway.app",
+]
+
+CSRF_TRUSTED_ORIGINS.extend(_get_origins(FRONTEND_URL))
+CSRF_TRUSTED_ORIGINS.extend(
+    [
+        "https://videoflix.jermaine-jerome-baerwolf.de",
+        "http://localhost:5500",
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    ]
+)
+
+CSRF_TRUSTED_ORIGINS = list(set(CSRF_TRUSTED_ORIGINS))
 
 
 # Application definition
@@ -218,39 +248,6 @@ BACKEND_URL = os.getenv(
     "BACKEND_URL", "https://videoflix-production-d706.up.railway.app"
 )
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
-
-# CORS-Freigabe: Cloud-Frontend dynamisch, lokal mit Standard-Ports
-CORS_ALLOWED_ORIGINS = _get_origins(FRONTEND_URL)
-if "https://videoflix-frontend-five.vercel.app" not in CORS_ALLOWED_ORIGINS:
-    CORS_ALLOWED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
-
-CORS_ALLOWED_ORIGINS.extend(
-    origin
-    for origin in (
-        "https://videoflix-frontend-five.vercel.app",
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-    )
-    if origin not in CORS_ALLOWED_ORIGINS
-)
-
-CSRF_TRUSTED_ORIGINS.extend(
-    origin
-    for origin in (
-        "https://videoflix-frontend-five.vercel.app",
-        "http://localhost:5500",
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-    )
-    if origin not in CSRF_TRUSTED_ORIGINS
-)
-if "https://videoflix-frontend-five.vercel.app" not in CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS.append("https://videoflix-frontend-five.vercel.app")
-CORS_ALLOW_CREDENTIALS = True
-
-
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 
 ANYMAIL = {
@@ -278,7 +275,3 @@ LOGGING = {
         },
     },
 }
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.railway.app",
-]
