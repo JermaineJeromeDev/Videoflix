@@ -30,12 +30,10 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
         "ALLOWED_HOSTS",
-        default="localhost,127.0.0.1,videoflix-production-d706.up.railway.app",
+        default="localhost,127.0.0.1,videoflix.jermaine-jerome-baerwolf.de",
     ).split(",")
     if host.strip()
 ]
-if "videoflix-production-d706.up.railway.app" not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append("videoflix-production-d706.up.railway.app")
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -64,11 +62,7 @@ CORS_ALLOWED_ORIGINS.extend(
 
 CORS_ALLOWED_ORIGINS = list(set(CORS_ALLOWED_ORIGINS))
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.railway.app",
-]
-
-CSRF_TRUSTED_ORIGINS.extend(_get_origins(FRONTEND_URL))
+CSRF_TRUSTED_ORIGINS = _get_origins(FRONTEND_URL)
 CSRF_TRUSTED_ORIGINS.extend(
     [
         "https://videoflix.jermaine-jerome-baerwolf.de",
@@ -77,7 +71,6 @@ CSRF_TRUSTED_ORIGINS.extend(
         "http://127.0.0.1:4200",
     ]
 )
-
 CSRF_TRUSTED_ORIGINS = list(set(CSRF_TRUSTED_ORIGINS))
 
 
@@ -244,9 +237,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
-BACKEND_URL = os.getenv(
-    "BACKEND_URL", "https://videoflix-production-d706.up.railway.app"
-)
+BACKEND_URL = os.getenv("BACKEND_URL", "https://videoflix.jermaine-jerome-baerwolf.de")
 EMAIL_LOGO_URL = os.getenv("EMAIL_LOGO_URL", "")
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 
