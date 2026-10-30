@@ -20,7 +20,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from core.views import robots_txt
+
 urlpatterns = [
+    path("robots.txt", robots_txt, name="robots-txt"),
     path("admin/", admin.site.urls),
     path("api/", include("auth_app.api.urls")),
     path("api/", include("video_app.api.urls")),
