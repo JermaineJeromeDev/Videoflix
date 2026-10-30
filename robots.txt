@@ -1,2 +1,9 @@
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /config
+Disallow: /node_modules
+Disallow: /.env
+Disallow: /*/.env
+Disallow: /*.env*
